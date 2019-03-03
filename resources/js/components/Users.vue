@@ -5,10 +5,10 @@
         <div class="col-xs-12">
           <div class="box">
             <div class="box-header">
-              <h3 class="box-title">Usewtyer Management </h3>
+              <h3 class="box-title">User Management </h3>
 
               <div class="box-tools mt-2">
-                <button class="btn btn-success pull-right mb-2"data-toggle="modal" data-target="#addUserModal">Add User
+                <button class="btn btn-success pull-right mb-2" @click="openAddModal">Add User
                   <i class="fas fa-user-plus fa-fw"></i>
                 </button>
               </div>
@@ -33,12 +33,12 @@
                   <td>{{user.created_at|mydate}}</td>
                   <!-- <td><span class="label label-success">Approved</span></td> -->
                   <td>
-                    <a href="#">
+                    <a href="#"@click="openEditModal(user)">
                       <i class="fa fa-edit blue"></i>
                     </a>||
-                    <a href="#">
-                      <i class="fa fa-trash red"></i>
-                    </a>
+                    <a href="#" @click="deleteUser(user.id)">
+                            <i class="fa fa-trash red"></i>
+                              </a>
 
                   </td>
                 </tr>
@@ -53,17 +53,19 @@
             </div>
 
 <!-- Start of Modal  -->
-    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add New User</h5>
+        <h5  v-show="!editmode" class="modal-title" id="exampleModalLabel">Add New User</h5>
+
+        <h5 v-show="editmode"  class="modal-title" id="exampleModalLabel">Edit User Information</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <!-- Start Code For Vform Axios -->
-      <form @submit.prevent="addUser" >
+      <form @submit.prevent="editmode ? updateUser() : addUser() " >
       <div class="modal-body">
     <div class="form-group">
       <label>name</label>
@@ -109,7 +111,8 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Add</button>
+        <button  v-show="editmode" type="submit" class="btn btn-primary">Update</button>
+        <button  v-show="!editmode" type="submit" class="btn btn-success">Add</button>
       </div>
 
       </form>
@@ -125,8 +128,10 @@
     export default {
       data(){
         return{
+          editmode:false,
           users:{},
           form:new Form({
+            id:'',
             name:'',
             email:'',
             password:'',
@@ -138,23 +143,93 @@
         }
       },
       methods:{
+        openAddModal(){
+          this.editmode=false;
+          this.form.reset();
+          $('#userModal').modal('show')
+        },
+        openEditModal(user){
+          this.editmode=true;
+          this.form.reset();
+          $('#userModal').modal('show')
+          this.form.fill(user);
+
+        },
+        deleteUser(id){
+          swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to Undo this!",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+          }).then((result) => {
+            //Send Request to the server
+              if (result.value) {
+                this.form.delete('api/user/'+id).then(()=>{
+
+                swal.fire(
+                  'Deleted!',
+                  'Your file has been deleted.',
+                  'success'
+                )
+                Fire.$emit('PageRefresh');
+
+            }).catch(()=>{
+              swal("Failed to Delete!","There was something wrong.","warning");
+            });
+              }
+
+          })
+        },
 
         loadUsers(){
         axios.get("api/user").then(({ data })=>(this.users=data.data));
         },
-        addUser(){
+      updateUser(){
+
           this.$Progress.start();
-          this.form.post('api/user');
-          $('#addUserModal').modal('hide')
-          toast.fire({
-            type: 'success',
-            title: 'User Added successfully'
-          })
+        this.form.put('api/user/'+this.form.id)
+        .then(()=>{
+          //success
+          $('#userModal').modal('hide')
+          Fire.$emit('PageRefresh');
+
+          swal.fire(
+            'Updated !',
+            'Your Information has been Updated successfully.',
+            'success'
+          )
           this.$Progress.finish();
-        }
+        })
+        .catch(()=>{
+          this.$Progress.fail();
+        });
+
       },
-        mounted() {
+      addUser(){
+                this.$Progress.start();
+                this.form.post('api/user')
+                .then(()=>{
+                    Fire.$emit('PageRefresh');
+                    $('#userModal').modal('hide')
+                    toast.fire({
+                        type: 'success',
+                        title: 'User Added in successfully'
+                        })
+                    this.$Progress.finish();
+                })
+                .catch(()=>{
+                })
+            }
+        },
+        created() {
             this.loadUsers();
+          // setInterval(()=> this.loadUsers(),3000);
+          Fire.$on('PageRefresh',()=>{
+            this.loadUsers();
+          });
         }
     }
 </script>
