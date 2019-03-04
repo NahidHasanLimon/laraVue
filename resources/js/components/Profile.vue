@@ -13,11 +13,11 @@
               <div class="card card-widget widget-user">
               <!-- Add the bg color to the header using any of the bg-* classes -->
               <div class="widget-user-header text-white" style="background-image:url('./img/cover.png')">
-                <h3 class="widget-user-username">Nahid Hasan </h3>
-                <h5 class="widget-user-desc">Web Developer</h5>
+                <h3 class="widget-user-username">{{this.form.name }} </h3>
+                <h5 class="widget-user-desc">{{this.form.biography}}</h5>
               </div>
               <div class="widget-user-image">
-                <img class="img-circle" src="" alt="User Avatar">
+                <img class="img-circle" :src="getProfilePhoto()" alt="User Avatar">
               </div>
               <div class="card-footer">
                 <div class="row">
@@ -262,11 +262,19 @@
         }
       },
       methods:{
+        getProfilePhoto(){
+          let photo = (this.form.photo.length>200)? this.form.photo  :"img/profilePhoto/"+this.form.photo;
+          return photo;
+
+        },
         updateInfo(){
           this.$Progress.start();
         this.form.put('api/profile')
         .then(()=>{
-
+          toast.fire({
+              type: 'success',
+              title: 'User Updated  successfully'
+              })
           this.$Progress.finish();
         })
         .catch(()=>{
@@ -284,10 +292,11 @@
                this.form.photo=reader.result;
              }
              reader.readAsDataURL(file);
+             // this.getProfilePhoto();
 
            } else{
              swal.fire(
-               'Updated !',
+               'Failed to Update !',
                'Sorry!! Its a Large File',
                'success'
              )
@@ -298,7 +307,7 @@
             console.log('Component mounted.')
         },
         created(){
-            axios.get("api/profile")
+             axios.get("api/profile")
             .then(({ data })=>(this.form.fill(data)));
         }
     }

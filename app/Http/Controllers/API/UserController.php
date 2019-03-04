@@ -79,14 +79,20 @@ class UserController extends Controller
           'password'=>'sometimes|min:6',
         ]);
 
-        $currenPhoto=$user->photo;
-        if($request->photo !=$currenPhoto){
+        $currentPhoto=$user->photo;
+        if($request->photo !=$currentPhoto){
         $name = time().'.' . explode('/', explode(':', substr($request->photo, 0, strpos($request->photo, ';')))[1])[1];
         \Image::make($request->photo)->save(public_path('img/profilePhoto/').$name);
         $request->merge(['photo' => $name]);
+        // $userOldPhoto=public_path('img/profile/profilePhoto/').$currentPhoto;
+
+        $useroldPhoto = public_path('img/profilePhoto/').$currentPhoto;
+           if(file_exists($useroldPhoto)){
+               @unlink($useroldPhoto);
+           }
         }
         if(!empty($request->password)){
-    $request->merge(['password' => Hash::make($request['password'])]);
+          $request->merge(['password' => Hash::make($request['password'])]);
     }
 
         $user->update($request->all());
