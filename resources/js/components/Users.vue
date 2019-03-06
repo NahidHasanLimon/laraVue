@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div class="row justify-content-center">
-        <div class="row mt-5">
+        <div class="row mt-5" v-if="$gate.isAdmin()">
         <div class="col-xs-12">
           <div class="box">
             <div class="box-header">
@@ -51,9 +51,11 @@
         </div>
       </div>
             </div>
-
+              <div v-if="!$gate.isAdmin()">
+                <not-found></not-found>
+              </div>
 <!-- Start of Modal  -->
-    <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -94,8 +96,8 @@
         class="form-control" :class="{ 'is-invalid': form.errors.has('type') }">
         <option value="">Select User Role</option>
         <option value="admin">Admin</option>
-        <option value="standard">Standard</option>
         <option value="author">Author</option>
+        <option value="user">User</option>
     </select>
     <has-error :form="form" field="type"></has-error>
     </div>
@@ -122,6 +124,9 @@
 <!-- End of Modal  -->
 
 </div>
+<!-- End of All -->
+
+
 </template>
 
 <script>
@@ -177,7 +182,7 @@
                 Fire.$emit('PageRefresh');
 
             }).catch(()=>{
-              swal("Failed to Delete!","There was something wrong.","warning");
+              swal.Fire("Failed to Delete!","There was something wrong.","warning");
             });
               }
 
@@ -185,7 +190,10 @@
         },
 
         loadUsers(){
-        axios.get("api/user").then(({ data })=>(this.users=data.data));
+          if (this.$gate.isAdmin()) {
+            axios.get("api/user").then(({ data })=>(this.users=data.data));
+
+          }
         },
       updateUser(){
 

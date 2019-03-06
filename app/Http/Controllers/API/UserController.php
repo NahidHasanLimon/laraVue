@@ -14,6 +14,7 @@ class UserController extends Controller
   public function __construct()
    {
        $this->middleware('auth:api');
+
    }
     /**
      * Display a listing of the resource.
@@ -22,6 +23,7 @@ class UserController extends Controller
      */
     public function index()
     {
+          $this->authorize('isAdmin');
         return User::latest()->paginate(10);
     }
 
@@ -66,7 +68,8 @@ class UserController extends Controller
      */
     public function profile()
     {
-      return auth('api')->user();
+
+       return auth('api')->user();
     }
 
     public function updateProfile(Request $request)
@@ -116,9 +119,13 @@ class UserController extends Controller
         'email'=>'required|string|max:191|unique:users,email,'.$user->id,
         'password'=>'sometimes|min:6',
       ]);
+      if(!empty($request->password)){
+        $request->merge(['password' => Hash::make($request['password'])]);
+      }
+
       $user->update($request->all());
 
-      return ['messaage'=>'Updated Infofdfsfdsfdsfrmation dfdsd successfully'];
+      return ['messaage'=>'Updated User successfully'];
     }
 
     /**
@@ -129,6 +136,7 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
+      $this->authorize('isAdmin');
       $user=User::findOrFail($id);
 
       $user->delete();

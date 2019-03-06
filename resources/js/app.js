@@ -13,6 +13,10 @@ window.Vue = require('vue');
 import moment from 'moment';
 import{Form,HasError,AlertError} from 'vform';
 
+import Gate from "./Gate";
+Vue.prototype.$gate= new Gate(window.user);
+
+
 
 
 
@@ -90,7 +94,10 @@ Vue.component(
     require('./components/passport/PersonalAccessTokens.vue').default
 );
 // Example of Vue and passport
-
+Vue.component(
+    'not-found',
+    require('./components/NotFound.vue').default
+);
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue

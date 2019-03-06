@@ -17,7 +17,7 @@
                 <h5 class="widget-user-desc">{{this.form.biography}}</h5>
               </div>
               <div class="widget-user-image">
-                <img class="img-circle" :src="getProfilePhoto()" alt="User Avatar">
+              <img class="img-circle" :src="getProfilePhoto()" alt="User Avatar">
               </div>
               <div class="card-footer">
                 <div class="row">
@@ -263,10 +263,9 @@
       },
       methods:{
         getProfilePhoto(){
-          let photo = (this.form.photo.length>200)? this.form.photo  :"img/profilePhoto/"+this.form.photo;
-          return photo;
-
-        },
+          let photo = (this.form.photo.length > 200) ? this.form.photo : "img/profilePhoto/"+ this.form.photo ;
+               return photo;
+           },
         updateInfo(){
           this.$Progress.start();
         this.form.put('api/profile')
