@@ -2426,7 +2426,7 @@ __webpack_require__.r(__webpack_exports__);
         //Send Request to the server
         if (result.value) {
           _this2.form.delete('api/user/' + id).then(function () {
-            swal.fire('Deleted!', 'Your file has been deleted.', 'success');
+            swal.Fire('Deleted!', 'Your file has been deleted.', 'success');
             Fire.$emit('PageRefresh');
           }).catch(function () {
             swal.Fire("Failed to Delete!", "There was something wrong.", "warning");
@@ -2479,11 +2479,15 @@ __webpack_require__.r(__webpack_exports__);
     var _this6 = this;
 
     Fire.$on('searching', function () {
+      _this6.$Progress.start();
+
       var query = _this6.$parent.search;
       axios.get('api/findUser?q=' + query).then(function (data) {
         _this6.users = data.data;
+
+        _this6.$Progress.finish();
       }).catch(function () {
-        swal.Fire("Sorry!! Nothing Matches!!", "warning");
+        swal.Fire("Failed to Delete!", "There was something wrong.", "warning");
       });
     });
     this.loadUsers(); // setInterval(()=> this.loadUsers(),3000);
@@ -79331,9 +79335,9 @@ var app = new vue__WEBPACK_IMPORTED_MODULE_3___default.a({
     search: ''
   },
   methods: {
-    searchit: function searchit() {
+    searchit: _.debounce(function () {
       Fire.$emit('searching');
-    }
+    }, 2000)
   }
 });
 

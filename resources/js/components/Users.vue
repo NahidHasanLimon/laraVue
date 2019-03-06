@@ -183,7 +183,7 @@
               if (result.value) {
                 this.form.delete('api/user/'+id).then(()=>{
 
-                swal.fire(
+                swal.Fire(
                   'Deleted!',
                   'Your file has been deleted.',
                   'success'
@@ -243,14 +243,15 @@
         },
         created() {
           Fire.$on('searching',()=>{
+              this.$Progress.start();
             let query= this.$parent.search;
-
             axios.get('api/findUser?q=' + query)
             .then((data)=>{
               this.users=data.data
+                this.$Progress.finish();
             })
             .catch(()=>{
-                swal.Fire("Sorry!! Nothing Matches!!","warning");
+                swal.Fire("Failed to Delete!","There was something wrong.","warning");
 
             })
 
