@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div class="row justify-content-center">
-        <div class="row mt-5" v-if="$gate.isAdmin()">
+        <div class="row mt-5" v-if="$gate.isAdminOrAuthor()">
         <div class="col-xs-12">
           <div class="box">
             <div class="box-header">
@@ -25,7 +25,7 @@
                   <th>Created at</th>
                   <th>Modify</th>
                 </tr>
-                <tr v-for="user in users" :key="user.id">
+                <tr v-for="user in users.data" :key="user.id">
                   <td>{{user.id}}</td>
                   <td>{{user.name}}</td>
                   <td>{{user.email}}</td>
@@ -46,12 +46,15 @@
               </tbody></table>
             </div>
             <!-- /.box-body -->
+            <!-- <div class="card-footer">
+              <pagination :data="users.data" @pagination-change-page="getResults"></pagination>
+            </div> -->
           </div>
           <!-- /.box -->
         </div>
       </div>
             </div>
-              <div v-if="!$gate.isAdmin()">
+              <div v-if="!$gate.isAdminOrAuthor()">
                 <not-found></not-found>
               </div>
 <!-- Start of Modal  -->
@@ -148,6 +151,12 @@
         }
       },
       methods:{
+        getResults(page = 1) {
+			axios.get('api/user?page=' + page)
+				.then(response => {
+					this.users = response.data;
+				});
+		},
         openAddModal(){
           this.editmode=false;
           this.form.reset();
@@ -190,8 +199,8 @@
         },
 
         loadUsers(){
-          if (this.$gate.isAdmin()) {
-            axios.get("api/user").then(({ data })=>(this.users=data.data));
+          if (this.$gate.isAdminOrAuthor()) {
+            axios.get("api/user").then(({ data })=>(this.users=data));
 
           }
         },
@@ -233,11 +242,25 @@
             }
         },
         created() {
+          Fire.$on('searching',()=>{
+            let query= this.$parent.search;
+
+            axios.get('api/findUser?q=' + query)
+            .then((data)=>{
+              this.users=data.data
+            })
+            .catch(()=>{
+                swal.Fire("Sorry!! Nothing Matches!!","warning");
+
+            })
+
+          })
             this.loadUsers();
           // setInterval(()=> this.loadUsers(),3000);
           Fire.$on('PageRefresh',()=>{
             this.loadUsers();
           });
+          this.getResults();
         }
     }
 </script>

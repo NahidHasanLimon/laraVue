@@ -33,9 +33,16 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('isAuthor',function($user){
           return $user->type==='author';
         });
-        
+
         Gate::define('isUser',function($user){
           return $user->type==='user';
+        });
+        
+        Gate::define('isAdminOrAuthor',function($user){
+          if ($user->type==='author' || $user->type==='admin') {
+            return true;
+            // code...
+          }
         });
             // End  of Gate
         //Start for passport
